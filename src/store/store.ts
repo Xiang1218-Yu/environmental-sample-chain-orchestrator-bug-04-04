@@ -124,6 +124,21 @@ export class Store {
     });
   }
 
+  /**
+   * Synchronous transaction. Work runs to completion (or throws) without yielding
+   * the event loop, so no other synchronous service call can interleave; the
+   * snapshot guarantees all-or-nothing rollback on a domain failure.
+   */
+  transactionSync<T>(work: () => T): T {
+    const before = this.snapshot();
+    try {
+      return work();
+    } catch (error) {
+      this.restore(before);
+      throw error;
+    }
+  }
+
   private replaceMap<T>(target: Map<string, T>, values: T[], keyOf: (value: T) => string = (value) => (value as T & { id: string }).id): void {
     target.clear();
     for (const value of values) target.set(keyOf(value), value);

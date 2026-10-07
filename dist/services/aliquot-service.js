@@ -57,6 +57,14 @@ export class AliquotService {
         this.store.addAudit({ tenantId: aliquot.tenantId, projectId: aliquot.projectId, action: 'aliquot.allocated', entity: 'aliquot', entityId: aliquot.id, metadata: { batchId } });
         return aliquot;
     }
+    release(aliquotId, batchId) {
+        const aliquot = assertFound(this.store.aliquots.get(aliquotId), 'aliquot.not_found', 'aliquot not found');
+        assertCondition(aliquot.status === 'ALLOCATED', 'aliquot.not_allocated', 'aliquot is not allocated to a batch');
+        aliquot.status = 'AVAILABLE';
+        aliquot.version += 1;
+        this.store.addAudit({ tenantId: aliquot.tenantId, projectId: aliquot.projectId, action: 'aliquot.released', entity: 'aliquot', entityId: aliquot.id, metadata: { batchId } });
+        return aliquot;
+    }
     toMilliliters(value, unit) {
         assertCondition(Number.isFinite(value) && value > 0, 'aliquot.invalid_volume', 'aliquot volume must be positive');
         if (unit === 'L')

@@ -68,6 +68,15 @@ export class AliquotService {
     return aliquot;
   }
 
+  release(aliquotId: string, batchId: string): Aliquot {
+    const aliquot = assertFound(this.store.aliquots.get(aliquotId), 'aliquot.not_found', 'aliquot not found');
+    assertCondition(aliquot.status === 'ALLOCATED', 'aliquot.not_allocated', 'aliquot is not allocated to a batch');
+    aliquot.status = 'AVAILABLE';
+    aliquot.version += 1;
+    this.store.addAudit({ tenantId: aliquot.tenantId, projectId: aliquot.projectId, action: 'aliquot.released', entity: 'aliquot', entityId: aliquot.id, metadata: { batchId } });
+    return aliquot;
+  }
+
   private toMilliliters(value: number, unit: 'ML' | 'G' | 'L'): number {
     assertCondition(Number.isFinite(value) && value > 0, 'aliquot.invalid_volume', 'aliquot volume must be positive');
     if (unit === 'L') return value * 1000;

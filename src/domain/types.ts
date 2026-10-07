@@ -108,6 +108,14 @@ export interface Aliquot extends Versioned {
   sourceOperationId: string;
 }
 
+export interface BatchFrozenSnapshot {
+  protocolVersion: string;
+  instrumentType: string;
+  memberAliquotIds: AliquotId[];
+  requiredControls: ControlRequirement[];
+  frozenAt: string;
+}
+
 export interface AnalysisBatch extends Versioned {
   id: BatchId;
   tenantId: TenantId;
@@ -122,6 +130,7 @@ export interface AnalysisBatch extends Versioned {
   createdAt: string;
   startedAt?: string;
   frozenAt?: string;
+  frozenSnapshot?: BatchFrozenSnapshot;
   approvedAt?: string;
 }
 
