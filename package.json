@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build:test && node --test dist-test/test/batch-lock.test.js dist-test/test/result-receipt.test.js dist-test/test/quality-frozen.test.js",
     "start": "node dist/index.js",
     "smoke": "npm run build && node dist/demo/smoke.js"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "typescript": "^5.6.3"
   }
 }

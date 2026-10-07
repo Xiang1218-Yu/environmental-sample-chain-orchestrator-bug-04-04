@@ -43,12 +43,15 @@ export class QualityService {
         assertCondition(batch.status === 'RESULTS_PENDING' || batch.status === 'UNDER_REVIEW', 'quality.batch_not_reviewable', 'batch is not ready for approval');
         const currentResults = [...this.store.results.values()].filter((result) => result.batchId === batch.id && result.status === 'CURRENT');
         assertCondition(currentResults.length > 0, 'quality.no_results', 'batch has no current results');
+        // Approval checks the control rules that were frozen at execution start,
+        // so later edits to the batch definition can never change what is approved.
+        const requiredControls = batch.frozenSnapshot?.requiredControls ?? batch.requiredControls;
         const controlKinds = new Map();
         for (const result of currentResults) {
             if (result.controlKind)
                 controlKinds.set(result.controlKind, (controlKinds.get(result.controlKind) ?? 0) + 1);
         }
-        for (const requirement of batch.requiredControls) {
+        for (const requirement of requiredControls) {
             assertCondition((controlKinds.get(requirement.kind) ?? 0) >= requirement.minimumCount, 'quality.control_missing', `missing control: ${requirement.kind}`);
         }
         for (const result of currentResults) {
